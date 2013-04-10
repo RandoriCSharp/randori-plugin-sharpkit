@@ -207,7 +207,7 @@ namespace randori.compiler
         {
             if ( cSharpDef != null && jsDef != null )
             {
-                ClassDepenencyFunctionBuilder dependencyBuilder = new ClassDepenencyFunctionBuilder( cSharpDef, jsDef );
+                ClassDependencyFunctionBuilder dependencyBuilder = new ClassDependencyFunctionBuilder( cSharpDef, jsDef );
                 JsExpressionStatement classDependencyStatement = dependencyBuilder.getDependencyExpression();
                 if (classDependencyStatement != null)
                 {
@@ -298,17 +298,9 @@ namespace randori.compiler
                                 }
                             }
 
-                            if ( fileList.Count > 0 && fileName != null )
+                            if ( fileName != null && fileList.Count > 0 )
                             {
-                                Console.WriteLine( ">> Generating HTML Merged File Cache ( " + fileName + " )" );
-
-                                HtmlCacheFileBuilder htmlCFBuilder = new HtmlCacheFileBuilder( fileName, fileList );
-                                SkJsFile nFile = htmlCFBuilder.buildHtmlCacheFile();
-
-                                if ( nFile != null )
-                                {
-                                    addJsFile( nFile );
-                                }
+                                insertHtmlCachedFile( fileName, fileList );
                             }
                         }
                     }
@@ -316,16 +308,19 @@ namespace randori.compiler
             }
         }
 
-        public void insertHtmlCachedFile ( string fileName, IEnumerable<string> fileList  )
+        public void insertHtmlCachedFile ( string fileName, List<string> fileList )
         {
-            Console.WriteLine( ">> Generating HTML Merged File Cache ( " + fileName + " )" );
-
-            HtmlCacheFileBuilder htmlCFBuilder = new HtmlCacheFileBuilder( fileName, fileList );
-            SkJsFile nFile = htmlCFBuilder.buildHtmlCacheFile();
-
-            if ( nFile != null )
+            if ( fileName != null && fileList.Count > 0 )
             {
-                addJsFile( nFile );
+                Console.WriteLine(">> Generating HTML Merged File Cache ( " + fileName + " )");
+
+                HtmlCacheFileBuilder htmlCFBuilder = new HtmlCacheFileBuilder(fileName, fileList);
+                SkJsFile nFile = htmlCFBuilder.buildHtmlCacheFile();
+
+                if (nFile != null)
+                {
+                    addJsFile(nFile);
+                }
             }
         }
 

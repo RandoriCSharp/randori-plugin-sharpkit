@@ -20,19 +20,19 @@
 using ICSharpCode.NRefactory.TypeSystem.Implementation;
 using SharpKit.JavaScript.Ast;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using randori.compiler.constants;
 using randori.compiler.utils;
+using randori.compiler.visitor;
 
 namespace randori.compiler.builders
 {
-    class ClassDepenencyFunctionBuilder
+    class ClassDependencyFunctionBuilder
     {
         
         protected DefaultResolvedTypeDefinition cSharpDef;
         protected JsUnit jsEntity;
 
-        public ClassDepenencyFunctionBuilder(DefaultResolvedTypeDefinition arg1, JsUnit arg2)
+        public ClassDependencyFunctionBuilder(DefaultResolvedTypeDefinition arg1, JsUnit arg2)
         {
             this.cSharpDef = arg1;
             this.jsEntity = arg2;
@@ -62,16 +62,6 @@ namespace randori.compiler.builders
 
         public JsFunction getClassDependencyFunction(JsUnit jsNode)
         {
-            // regex for finding: 1) any typeof references 2) any uses of the "new" keyword
-            // This does not work 100%, temporary solution until Dan-el Implements a visitor pattern in SharpKit
-            string replaceIgnore = @"void\('#RANDORI_IGNORE_BEGIN([^;]*);[\W\w]*?void\('#RANDORI_IGNORE_END([^;]*);";
-            //string regStr = @"(?<=Typeof\()(.*?)(?=\))|(?<=new ).*?(?=\()";
-            string regStr = @"(?:Typeof\(|new\s)([\w\.]+)(?:\(|\))";
-
-            // get the javascript
-            string jsStr = jsEntity.ToJs();
-            jsStr = Regex.Replace(jsStr, replaceIgnore, "");
-            
             // function contents
             JsBlock resultsBlock = new JsBlock();
             resultsBlock.Statements = new List<JsStatement>();
@@ -79,7 +69,8 @@ namespace randori.compiler.builders
             // Check to see if we need to call super.
             string superClassPath = null;
             
-            // 12/04/1012 - Mike doesn't want to call super, commenting out to value remains null. Clean up later once this is confirmed after testing.
+            // bschmidtke: 12/04/1012 - We do not want to call super at the moment, commenting out to value remains null. 
+            // Clean up later once this is confirmed after testing.
             // Leaving the code using superClassPath intact until we decide what route to go with this.
 
             //bool initArray = true;
@@ -126,28 +117,24 @@ namespace randori.compiler.builders
             // define return variable.
             resultsBlock.Statements.Add( AstUtils.getJsVariableDeclarationStatement( InjectionPointVariableConstants.SWITCH_RETURN_VARIABLE_NAME ) );
 
-            MatchCollection match = Regex.Matches(jsStr, regStr, RegexOptions.None);
-            if (match.Count > 0)
+            ClassDependencyVisitor visitor = new ClassDependencyVisitor( cSharpDef, jsEntity );
+            List<string> dependencyList = visitor.dependencyList;
+
+            if (dependencyList.Count > 0)
             {
-                resultsBlock.Statements.Add(pStatement);
+                resultsBlock.Statements.Add( pStatement );
 
                 List<string> dups = new List<string>();
-
-                foreach (Match typeMatch in match)
+                foreach ( string dependency in dependencyList )
                 {
-                    if (typeMatch.Groups != null && typeMatch.Groups.Count > 1)
+                    if ( !dups.Contains( dependency ) && dependency.Length > 1 )
                     {
-                        // based on the regex Mike wrote, we will always want the first capture.
-                        // [0] is what we searched for
-                        // [1] is what we are wanting to capture
-                        string value = "\'" + typeMatch.Groups[1] + "\'";
-                        if (!dups.Contains(value) && value.Length > 1)
-                        {
-                            dups.Add(value);
+                        dups.Add( dependency );
+                        
+                        string value = "\'" + dependency + "\'";
 
-                            JsExpressionStatement insert = AstUtils.getArrayInsertStatement( InjectionPointVariableConstants.SWITCH_RETURN_VARIABLE_NAME, value );
-                            resultsBlock.Statements.Add(insert);
-                        }
+                        JsExpressionStatement insert = AstUtils.getArrayInsertStatement( InjectionPointVariableConstants.SWITCH_RETURN_VARIABLE_NAME, value );
+                        resultsBlock.Statements.Add( insert );
                     }
                 }
 
