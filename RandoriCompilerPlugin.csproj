@@ -61,7 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="builders\ClassDepenencyFunctionBuilder.cs" />
+    <Compile Include="builders\ClassDependencyFunctionBuilder.cs" />
     <Compile Include="builders\ObservablePropertiesBuilder.cs" />
     <Compile Include="builders\InjectionPointsFunctionBuilder.cs" />
     <Compile Include="constants\OutputNameConstants.cs" />
@@ -80,6 +80,8 @@
     <Compile Include="utils\GuiceUtils.cs" />
     <Compile Include="builders\HtmlCacheFileBuilder.cs" />
     <Compile Include="utils\IEntityUtils.cs" />
+    <Compile Include="visitor\ClassDependencyVisitor.cs" />
+    <Compile Include="visitor\JsNodeVisitorBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
