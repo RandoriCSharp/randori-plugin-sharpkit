@@ -120,9 +120,9 @@ namespace randori.compiler
                 }
             }
 
-            switch (arg1.EntityType)
+            switch (arg1.SymbolKind)
             {
-                case EntityType.TypeDefinition:
+                case SymbolKind.TypeDefinition:
                     // TODO: 04/05/2013 - The [Observable] tag is incomplete, commenting out until functionality can be completed
                     // Console.WriteLine(">> Compiler_BeforeConvertCsToJsEntity ( " + arg1.FullName + " )");
                     //DefaultResolvedTypeDefinition cSharpDef = (DefaultResolvedTypeDefinition) arg1;
@@ -167,9 +167,9 @@ namespace randori.compiler
                 }
             }
 
-            switch ( arg1.EntityType )
+            switch ( arg1.SymbolKind )
             {
-                case EntityType.TypeDefinition:
+                case SymbolKind.TypeDefinition:
 
                     DefaultResolvedTypeDefinition cSharpDef = ( DefaultResolvedTypeDefinition ) arg1;
                     JsUnit jsDef = ( JsUnit ) arg2;
