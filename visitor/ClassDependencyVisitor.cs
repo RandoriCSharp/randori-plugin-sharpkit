@@ -175,8 +175,17 @@ namespace randori.compiler.visitor
             if (node != null)
             {
                 visit(node.Condition);
-                visit(node.Initializer);
-                visit(node.Iterator);
+
+                foreach (JsStatement initializer in node.Initializers)
+                {
+                    visit(initializer);
+                }
+
+                foreach (JsStatement iterator in node.Iterators)
+                {
+                    visit(iterator);
+                }
+
                 visit(node.Statement);
             }
         }
